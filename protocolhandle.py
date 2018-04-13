@@ -1,7 +1,10 @@
+import os
 import os.path
 import argparse
 import re
 import base64
+import sys
+import subprocess
 
 try:
     import _winreg as wr
@@ -14,8 +17,10 @@ ACCESS_RIGHTS = (wr.KEY_WRITE | wr.KEY_READ
 
 
 def register_octosearch_protocol_handler():
-    current_file = os.path.abspath(__file__)
-    command = 'python ' + current_file + ' ' + '"%1"'
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    current_file = os.path.join(dirname, sys.argv[0])
+
+    command = current_file + ' ' + '"%1"'
     protocol = 'octosearch'
     description = 'Octosearch local file opener protocol handler'
 
@@ -50,20 +55,38 @@ def register_protocol_handler(protocol, command, description):
 
 
 def handle_open(url):
-    location = parse_url(url)
+    filepath = parse_url(url)
+    print('Opening {}...'.format(filepath))
+    open_file(filepath)
+
+
+def open_file(filepath):
+    if not isinstance(filepath, str):
+        raise Exception('filepath param must be str object')
+
+    if sys.platform.startswith('darwin'):
+        subprocess.call(('open', filepath))
+    elif os.name == 'nt':
+        os.startfile(filepath)
+    elif os.name == 'posix':
+        subprocess.call(('xdg-open', filepath))
+    else:
+        raise Exception('OS not supported: {}'.format(os.name))
 
 
 def parse_url(url):
-    expr = r"octosearch://v1/open/(?P<encodedlocation>[A-Z0-9]+)"
+    expr = r"octosearch://v1/open/(?P<encodedlocation>.+)"
     match = re.fullmatch(expr, url)
-    print(url)
 
     if not match:
         raise Exception('That does not look like a url we can handle!')
 
-    decoded_location = base64.b64decode(match.group('encodedlocation'))
+    try:
+        location = base64.b64decode(match.group('encodedlocation'))
+    except Exception:
+        raise Exception('It looks like the url provided does contain a valid base64 payload')
 
-    return decoded_location
+    return location.decode()
 
 
 if __name__ == "__main__":

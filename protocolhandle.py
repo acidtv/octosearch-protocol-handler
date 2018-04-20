@@ -85,7 +85,10 @@ def handle_open(data, validated):
     filepath = data['url']
 
     print('Opening {}...'.format(filepath))
-    platform.open_file(filepath)
+    try:
+        platform.open_file(filepath)
+    except Exception as e:
+        platform.popup('Could not open file: {}'.format(e))
 
 
 def handle_register(data, validated):
@@ -108,7 +111,7 @@ def handle_register(data, validated):
 def command_install(args):
     """Handles the cli command to register this program as a protocol handler"""
     platform.install()
-    platform.popup('Installation succeeded!', 'Success')
+    platform.popup('Installation succeeded!')
 
 
 def command_url(args):

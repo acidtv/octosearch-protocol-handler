@@ -12,6 +12,15 @@ ACCESS_RIGHTS = (wr.KEY_WRITE | wr.KEY_READ
                 | wr.KEY_QUERY_VALUE | wr.KEY_SET_VALUE
                 | wr.KEY_CREATE_SUB_KEY | wr.KEY_ENUMERATE_SUB_KEYS)
 
+# Popup button options
+BTN_OK = 0x0
+BTN_YESNO = 0x4
+
+# Popup button return codes
+BTN_RESULT_OK = 1
+BTN_RESULT_YES = 6
+BTN_RESULT_NO = 7
+
 
 def _register_protocol_handler(protocol, command, description):
     r"""
@@ -63,6 +72,9 @@ def settings_folder():
     return os.path.join(os.getenv('APPDATA'), 'Octosearch')
 
 
-def popup(msg):
+def popup(msg, button=None):
     """Display a popup"""
-    ctypes.windll.user32.MessageBoxW(0, msg, 'Octosearch', 1)
+    if not button:
+        button = BTN_OK
+
+    return ctypes.windll.user32.MessageBoxW(0, msg, 'Octosearch', button)

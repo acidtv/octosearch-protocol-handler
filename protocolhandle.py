@@ -20,6 +20,32 @@ else:
 PROTOCOL = 'octosearch'
 VERSION = 'v1'
 
+SAFE_EXTENSIONS = [
+    # text and office files
+    'doc', 'docx', 'txt', 'md', 'rtf',
+    'odt', 'odp', 'ods', 'pdf', 'ppt', 'pptx',
+    'xls', 'xlsx', 'csv', 'log',
+
+    # images
+    'gif', 'jpg', 'jpeg',
+    'tif', 'tiff', 'png',
+    'psd', 'svg', 'ai',
+    'webp', 'xcf', 'kra',
+
+    # audio
+    'mp3', 'wav', 'ogg', 'flac',
+
+    # video
+    'mpg', 'mpeg', 'mov', 'mkv', 'avi', 'wmv', 'vob',
+
+    # archives
+    'zip', 'gz', 'xz',
+
+    # misc
+    'html', 'htm', 'gpx', 'zip', 'ini', 'conf', 'nef',
+    'srt', 'yml',
+]
+
 
 def parse_url(url):
     """Parse an Octosearch url into usable parts"""
@@ -71,6 +97,11 @@ def validate_hmac(payload, hash):
 
     return hmac.compare_digest(h.hexdigest(), hash)
 
+def safe_extension(path):
+    """Check if file has a safe extension"""
+    __, ext = os.path.splitext(path)
+
+    return ext.lower() in SAFE_EXTENSIONS
 
 def handle_open(data, validated):
     """Open a local file"""
@@ -83,6 +114,10 @@ def handle_open(data, validated):
         return
 
     filepath = data['url']
+
+    if not safe_extension(filepath):
+        platform.popup('The filetype of the file you\'re trying to open ({}) is not considered safe. If you insist on opening it, you will have to open it manually.'.format(filepath))
+        return
 
     print('Opening {}...'.format(filepath))
     try:

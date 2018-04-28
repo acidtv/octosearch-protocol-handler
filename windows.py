@@ -53,13 +53,13 @@ def _translate_url(url):
     """Translate url into something Windows can understand.
     For now this translates smb:// urls into UNC paths"""
 
-    if urllib.parse.urlparse(url).scheme is 'smb':
+    if urllib.parse.urlparse(url).scheme == 'smb':
         parsed = urllib.parse.urlparse(url)
-        winpath = PureWindowsPath(r'\\' + parsed.netloc, parsed.path)
+        winpath = PureWindowsPath(r'//' + parsed.netloc + parsed.path)
 
         return str(winpath)
 
-    return path
+    return url
 
 
 def install():

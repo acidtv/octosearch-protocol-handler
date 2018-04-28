@@ -49,12 +49,12 @@ def _register_protocol_handler(protocol, command, description):
         wr.SetValueEx(command_key, "", 0, wr.REG_SZ, command)
 
 
-def _translate_path(path):
-    """Translate path into something Windows can understand.
+def _translate_url(url):
+    """Translate url into something Windows can understand.
     For now this translates smb:// urls into UNC paths"""
 
-    if urllib.parse.urlparse(path).scheme is 'smb':
-        parsed = urllib.parse.urlparse(path)
+    if urllib.parse.urlparse(url).scheme is 'smb':
+        parsed = urllib.parse.urlparse(url)
         winpath = PureWindowsPath(r'\\' + parsed.netloc, parsed.path)
 
         return str(winpath)

@@ -2,6 +2,8 @@ import os
 import os.path
 import protocolhandle
 import ctypes
+import urllib.parse
+from pathlib import PureWindowsPath
 
 try:
     import _winreg as wr
@@ -47,6 +49,19 @@ def _register_protocol_handler(protocol, command, description):
         wr.SetValueEx(command_key, "", 0, wr.REG_SZ, command)
 
 
+def _translate_path(path):
+    """Translate path into something Windows can understand.
+    For now this translates smb:// urls into UNC paths"""
+
+    if urllib.parse.urlparse(path).scheme is 'smb':
+        parsed = urllib.parse.urlparse(path)
+        winpath = PureWindowsPath(r'\\' + parsed.netloc, parsed.path)
+
+        return str(winpath)
+
+    return path
+
+
 def install():
     """Register this program as a protocol handler"""
     current_file = protocolhandle.executable_location()
@@ -60,12 +75,15 @@ def install():
     _register_protocol_handler(protocol, command, description)
 
 
-def open_file(filepath):
+def open_file(url):
     """Open a local file"""
-    if not isinstance(filepath, str):
-        raise protocolhandle.OctosearchException('filepath param must be str object')
+    if not isinstance(url, str):
+        raise protocolhandle.OctosearchException('url param must be str object')
 
-    os.startfile(filepath)
+    translated_url = _translate_url(url)
+
+    print('Opening {}...'.format(translated_url))
+    os.startfile(translated_url)
 
 
 def settings_folder():

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import argparse
@@ -230,5 +232,6 @@ if __name__ == "__main__":
     try:
         args.func(args)
     except OctosearchException as e:
-        print('Error: {}'.format(e), file=sys.stderr)
+        platform.popup(str(e))
+        #print('Error: {}'.format(e), file=sys.stderr)
         sys.exit(1)

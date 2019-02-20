@@ -83,7 +83,7 @@ def parse_url(url):
 def executable_location():
     """Get the filesystem location of the current executable"""
     dirname = os.path.dirname(os.path.abspath(__file__))
-    current_file = os.path.join(dirname, sys.argv[0])
+    current_file = os.path.normpath(os.path.join(dirname, sys.argv[0]))
 
     return current_file
 
